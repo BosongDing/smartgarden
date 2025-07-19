@@ -1,0 +1,99 @@
+{
+  "simulation": {
+    "total_steps": 240,
+    "steps_per_day": 8,
+    "hours_per_step": 3,
+    "simulation_days": 30,
+    "random_seed": 24
+  },
+  "plants": {
+    "lettuce": {
+      "scientific_name": "Lactuca sativa",
+      "category": "fragile",
+      "soil_threshold": 0.38,
+      "nutrient_threshold": 0.35,
+      "critical_soil": 0.20,
+      "critical_nutrient": 0.15,
+      "growth_rate_max": 0.12,
+      "harvest_day": 30
+    },
+    "spinach": {
+      "scientific_name": "Spinacia oleracea",
+      "category": "fragile", 
+      "soil_threshold": 0.40,
+      "nutrient_threshold": 0.30,
+      "critical_soil": 0.22,
+      "critical_nutrient": 0.12,
+      "growth_rate_max": 0.15,
+      "harvest_day": 30
+    },
+    "radish": {
+      "scientific_name": "Raphanus sativus",
+      "category": "hardy",
+      "soil_threshold": 0.30,
+      "nutrient_threshold": 0.25,
+      "critical_soil": 0.15,
+      "critical_nutrient": 0.10,
+      "growth_rate_max": 0.18,
+      "harvest_day": 30
+    },
+    "swiss_chard": {
+      "scientific_name": "Beta vulgaris subsp. vulgaris",
+      "category": "hardy",
+      "soil_threshold": 0.32,
+      "nutrient_threshold": 0.28,
+      "critical_soil": 0.18,
+      "critical_nutrient": 0.12,
+      "growth_rate_max": 0.14,
+      "harvest_day": 30
+    },
+    "nasturtium": {
+      "scientific_name": "Tropaeolum majus",
+      "category": "flower",
+      "soil_threshold": 0.35,
+      "nutrient_threshold": 0.30,
+      "critical_soil": 0.20,
+      "critical_nutrient": 0.15,
+      "growth_rate_max": 0.10,
+      "harvest_day": 30,
+      "flower_stage_soil_threshold": 0.50,
+      "flower_stage_day": 20
+    }
+  },
+  "weather": {
+    "netherlands_july": {
+      "temp_mean": 18.0,
+      "temp_amplitude": 5.0,
+      "temp_noise_std": 1.0,
+      "rain_probability_per_day": 0.2
+    }
+  },
+  "devices": {
+    "water_pump": {
+      "water_effect": 0.25
+    },
+    "fertilizer": {
+      "fertilizer_effect": 0.20
+    },
+    "sensors": {
+      "failure_probability": 0.1,
+      "sensor_error_probability": 0.15
+    }
+  },
+  "soil": {
+    "pot_capacity_ml": 2000.0,
+    "evaporation_base_rate": 0.02,
+    "nutrient_consumption_rate": 0.015
+  },
+  "evaluation": {
+    "scoring_weights": {
+      "total_biomass": 0.6,
+      "plant_health": 0.4
+    },
+    "penalties": {
+      "plant_death": -20,
+      "overwatering": -10,
+      "overfertilizing": -15
+    }
+  }
+}
