@@ -171,16 +171,16 @@ def display_final_results(results: Dict):
         print(f"   • 浇水成功率: {student_perf.get('water_success_rate', 0)*100:.1f}%")
         print(f"   • 施肥成功率: {student_perf.get('fertilize_success_rate', 0)*100:.1f}%")
     
-    # 评估详情
-    if eval_summary:
-        print("\n🏆 评估详情:")
-        components = eval_summary.get("component_breakdown", {})
-        print(f"   • 生物量得分: {components.get('biomass', 0):.1f}")
-        print(f"   • 健康得分: {components.get('health', 0):.1f}")
-        print(f"   • 存活得分: {components.get('survival', 0):.1f}")
-        print(f"   • 效率得分: {components.get('efficiency', 0):.1f}")
-        print(f"   • 总惩罚: {eval_summary.get('total_penalties', 0):.1f}")
-        print(f"   • 最高得分: {eval_summary.get('best_score', 0):.1f}")
+    # # 评估详情
+    # if eval_summary:
+    #     print("\n🏆 评估详情:")
+    #     components = eval_summary.get("component_breakdown", {})
+    #     print(f"   • 生物量得分: {components.get('biomass', 0):.1f}")
+    #     print(f"   • 健康得分: {components.get('health', 0):.1f}")
+    #     print(f"   • 存活得分: {components.get('survival', 0):.1f}")
+    #     print(f"   • 效率得分: {components.get('efficiency', 0):.1f}")
+    #     print(f"   • 总惩罚: {eval_summary.get('total_penalties', 0):.1f}")
+    #     print(f"   • 最高得分: {eval_summary.get('best_score', 0):.1f}")
 
 def save_results(results: Dict, output_path: str):
     """保存结果到文件"""
