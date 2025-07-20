@@ -62,7 +62,7 @@
   },
   "weather": {
     "netherlands_july": {
-      "temp_mean": 18.0,
+      "temp_mean": 23.0,
       "temp_amplitude": 5.0,
       "temp_noise_std": 1.0,
       "rain_probability_per_day": 0.2
