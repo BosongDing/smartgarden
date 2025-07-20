@@ -10,7 +10,7 @@
     "lettuce": {
       "scientific_name": "Lactuca sativa",
       "category": "fragile",
-      "soil_threshold": 0.38,
+      "soil_threshold": 0.45,
       "nutrient_threshold": 0.35,
       "critical_soil": 0.20,
       "critical_nutrient": 0.15,
@@ -40,7 +40,7 @@
     "swiss_chard": {
       "scientific_name": "Beta vulgaris subsp. vulgaris",
       "category": "hardy",
-      "soil_threshold": 0.32,
+      "soil_threshold": 0.25,
       "nutrient_threshold": 0.28,
       "critical_soil": 0.18,
       "critical_nutrient": 0.12,
