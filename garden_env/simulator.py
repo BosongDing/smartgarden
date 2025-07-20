@@ -412,6 +412,9 @@ class GardenSimulator:
         self.is_running = False
         self.step_results = []
         
+        # 状态数据收集器
+        self.state_data_history = {}  # {step: {pot_id: state_data}}
+        
     def register_student_functions(self, should_water: Callable, should_fertilize: Callable):
         """注册学生决策函数"""
         self.student_functions["should_water"] = should_water
@@ -563,12 +566,15 @@ class GardenSimulator:
         
         if sensor_readings is None:
             return decisions
+        
+        # 初始化当前步骤的状态数据收集
+        self.state_data_history[self.current_step] = {}
             
         # 为每个花盆调用决策函数
         for pot_id in range(5):
             pot_key = f"pot_{pot_id}"
             if pot_key in sensor_readings:
-                # 构建包含历史数据的状态字典
+                # 构建包含历史数据的状态字典（排除sensor_history和action_history）
                 state = {
                     "pot_id": pot_id,
                     "step": self.current_step,
@@ -584,6 +590,10 @@ class GardenSimulator:
                     "action_history": self.state_manager.get_action_history(pot_id)
                 }
                 
+                # 保存状态数据（转换为可序列化格式）
+                serializable_state = self._make_state_serializable(state.copy())
+                self.state_data_history[self.current_step][pot_id] = serializable_state
+                
                 # 调用学生函数
                 try:
                     should_water = self.student_functions["should_water"](state)
@@ -598,6 +608,64 @@ class GardenSimulator:
                     print(f"⚠️  学生决策函数出错 (pot {pot_id}): {e}")
                     
         return decisions
+        
+    def _make_state_serializable(self, state: Dict) -> Dict:
+        """将状态对象转换为可序列化的格式（排除历史数据）"""
+        serializable_state = {}
+        
+        for key, value in state.items():
+            if key in ["sensor_history", "action_history"]:
+                # 排除历史数据
+                continue
+            elif key == "sensor_data":
+                # 转换SensorReading对象为字典
+                if hasattr(value, '__dict__'):
+                    serializable_state[key] = {
+                        "soil_moisture": value.soil_moisture,
+                        "nutrient_level": value.nutrient_level,
+                        "temperature": value.temperature
+                    }
+                else:
+                    serializable_state[key] = value
+            elif key == "plant_status":
+                # 转换PlantStatus对象为字典
+                if hasattr(value, '__dict__'):
+                    serializable_state[key] = {
+                        "health": value.health,
+                        "biomass": value.biomass,
+                        "phenology": value.phenology.value if hasattr(value.phenology, 'value') else str(value.phenology),
+                        "days_alive": value.days_alive,
+                        "soil_moisture": value.soil_moisture,
+                        "nutrient_level": value.nutrient_level,
+                        "stress_level": value.stress_level
+                    }
+                else:
+                    serializable_state[key] = value
+            else:
+                # 处理其他可能的非序列化对象
+                serializable_state[key] = self._convert_to_serializable(value)
+                
+        return serializable_state
+    
+    def _convert_to_serializable(self, obj):
+        """递归转换对象为可序列化格式"""
+        if obj is None:
+            return None
+        elif isinstance(obj, (str, int, float, bool)):
+            return obj
+        elif isinstance(obj, (list, tuple)):
+            return [self._convert_to_serializable(item) for item in obj]
+        elif isinstance(obj, dict):
+            return {k: self._convert_to_serializable(v) for k, v in obj.items()}
+        elif hasattr(obj, '__dict__'):
+            # 对象有属性字典，转换为字典
+            return {k: self._convert_to_serializable(v) for k, v in obj.__dict__.items()}
+        elif hasattr(obj, 'value'):
+            # 枚举类型
+            return obj.value
+        else:
+            # 其他类型转换为字符串
+            return str(obj)
         
     def _execute_device_actions(self, student_decisions: Dict, step: int) -> Dict:
         """执行设备操作 - 考虑设备故障"""
@@ -677,6 +745,9 @@ class GardenSimulator:
         # 得分趋势
         scores = [s.score for s in self.step_results]
         
+        # 保存状态数据到文件
+        self.save_state_data("current_run_data.json")
+        
         return {
             "simulation_summary": {
                 "total_steps": len(self.step_results),
@@ -705,6 +776,56 @@ class GardenSimulator:
             "evaluation_summary": self.evaluator.get_evaluation_summary(),
             "state_summary": self.state_manager.get_simulation_summary()
         }
+
+    def save_state_data(self, filepath: str = "current_run_data.json"):
+        """保存状态数据到JSON文件"""
+        try:
+            # 确保数据已收集
+            if not self.state_data_history:
+                print("⚠️  没有状态数据可保存")
+                return
+            
+            print(f"💾 正在保存 {len(self.state_data_history)} 步的状态数据...")
+            
+            # 写入文件
+            with open(filepath, 'w', encoding='utf-8') as f:
+                json.dump(self.state_data_history, f, indent=2, ensure_ascii=False, default=str)
+            
+            # 验证文件是否正确写入
+            file_size = Path(filepath).stat().st_size
+            print(f"✅ 状态数据已保存到: {filepath} (大小: {file_size:,} 字节)")
+            
+        except Exception as e:
+            print(f"❌ 保存状态数据失败: {e}")
+            import traceback
+            traceback.print_exc()
+    
+    def load_state_data(self, filepath: str = "current_run_data.json") -> Dict:
+        """从JSON文件加载状态数据"""
+        try:
+            with open(filepath, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            print(f"✅ 状态数据已从 {filepath} 加载")
+            return data
+        except Exception as e:
+            print(f"❌ 加载状态数据失败: {e}")
+            return {}
+    
+    def get_state_data_for_pot(self, pot_id: int) -> Dict:
+        """获取特定花盆的所有状态数据"""
+        pot_data = {}
+        for step, step_data in self.state_data_history.items():
+            if pot_id in step_data:
+                pot_data[step] = step_data[pot_id]
+        return pot_data
+    
+    def get_state_data_for_step(self, step: int) -> Dict:
+        """获取特定步骤的所有花盆状态数据"""
+        return self.state_data_history.get(step, {})
+        
+    def get_all_state_data(self) -> Dict:
+        """获取所有状态数据"""
+        return self.state_data_history.copy()
 
     # 为了兼容性，保留一些接口方法
     def get_sensor_readings(self):

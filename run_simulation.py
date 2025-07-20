@@ -217,6 +217,15 @@ def run_simulation_with_functions(functions: Dict[str, Callable], args: argparse
             total_steps=args.steps
         )
         
+        # 保存状态数据
+        state_data_filename = "current_run_data.json"
+        if args.output:
+            # 如果指定了输出文件，使用相同的基础名称
+            base_name = args.output.replace('.json', '')
+            state_data_filename = f"{base_name}_state_data.json"
+        
+        simulator.save_state_data(state_data_filename)
+        
         return results
         
     except Exception as e:

@@ -76,8 +76,8 @@
       "fertilizer_effect": 0.20
     },
     "sensors": {
-      "failure_probability": 0.1,
-      "sensor_error_probability": 0.1
+      "failure_probability": 0.01,
+      "sensor_error_probability": 0.01
     }
   },
   "soil": {
