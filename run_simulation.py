@@ -253,9 +253,12 @@ def main():
                        help="学生代码文件路径")
     parser.add_argument("--debug", action="store_true",
                        help="调试模式 - 显示详细错误信息")
+    parser.add_argument("--hard-mode", action="store_true",
+                       help="调试模式 - 显示详细错误信息")
     
     args = parser.parse_args()
-    
+    if args.hard-mode:
+        args.config="garden_env/config2.json"
     # 检查配置文件
     if not Path(args.config).exists():
         print(f"❌ 配置文件不存在: {args.config}")
